@@ -1,5 +1,6 @@
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { UserInput, UserOutput, UsersOutput } from './dto/user.dto';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, LoggerService } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserInput, CreateUserOutput } from './dto/create-user.dto';
@@ -11,20 +12,23 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly users: Repository<User>,
+
+    @Inject(WINSTON_MODULE_NEST_PROVIDER)
+    private readonly logger: LoggerService,
   ) {}
 
   async create(createUserInput: CreateUserInput): Promise<CreateUserOutput> {
     try {
-      console.log(createUserInput);
+      this.logger.log(createUserInput);
       const newUser = this.users.create(createUserInput);
       const res = this.users.save(newUser);
-      console.log('res: ', res);
+      this.logger.log(res);
 
       return {
         ok: true,
       };
     } catch (e) {
-      console.log(e);
+      this.logger.log(e);
       return {
         ok: false,
         error: 'could not make user',
@@ -40,7 +44,7 @@ export class UsersService {
         users: allUsers,
       };
     } catch (e) {
-      console.log(e);
+      this.logger.log(e);
       return {
         ok: false,
         error: 'could not find all',
@@ -97,7 +101,7 @@ export class UsersService {
         ok: true,
       };
     } catch (e) {
-      console.log(e);
+      this.logger.log(e);
       return {
         ok: false,
         error: 'could not update user',
@@ -121,7 +125,7 @@ export class UsersService {
         ok: true,
       };
     } catch (e) {
-      console.log(e);
+      this.logger.log(e);
       return {
         ok: false,
         error: 'could not delete',

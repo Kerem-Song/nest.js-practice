@@ -7,7 +7,11 @@ import { UsersModule } from './users/users.module';
 import * as Joi from 'joi';
 import { User } from './users/entities/user.entity';
 import { APP_PIPE } from '@nestjs/core';
-
+import {
+  utilities as nestWinstonModuleUtilities,
+  WinstonModule,
+} from 'nest-winston';
+import * as winston from 'winston';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -32,6 +36,31 @@ import { APP_PIPE } from '@nestjs/core';
       entities: [User],
       synchronize: process.env.NODE_ENV !== 'prod',
       logging: false,
+    }),
+    WinstonModule.forRoot({
+      transports: [
+        new winston.transports.Console({
+          format: winston.format.combine(
+            winston.format.timestamp(),
+            winston.format.ms(),
+            winston.format.colorize(),
+            winston.format.simple(),
+            nestWinstonModuleUtilities.format.nestLike(),
+          ),
+        }),
+        new winston.transports.File({
+          filename: 'combined.log',
+          level: 'info',
+        }),
+        new winston.transports.File({
+          filename: 'erros.log',
+          level: 'error',
+          format: winston.format.json(),
+        }),
+      ],
+      exceptionHandlers: [
+        new winston.transports.File({ filename: 'exceptions.log' }),
+      ],
     }),
     UsersModule,
   ],
