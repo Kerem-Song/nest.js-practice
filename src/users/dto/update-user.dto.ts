@@ -1,0 +1,7 @@
+import { CoreOutput } from './output.dto';
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateUserInput } from './create-user.dto';
+
+export class UpdateUserInput extends PartialType(CreateUserInput) {}
+
+export class UpdateUserOutput extends CoreOutput {}
